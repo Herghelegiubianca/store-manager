@@ -1,0 +1,6 @@
+org.example
+org.example.businessLogic
+org.example.connection
+org.example.dao
+org.example.gui
+org.example.model

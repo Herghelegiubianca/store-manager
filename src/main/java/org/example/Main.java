@@ -1,17 +1,27 @@
 package org.example;
 
+import org.example.businessLogic.BillBLL;
+import org.example.businessLogic.ClientBLL;
+import org.example.businessLogic.OrderBLL;
+import org.example.businessLogic.ProductBLL;
+import org.example.gui.BillView;
+import org.example.gui.ClientView;
+import org.example.gui.OrderView;
+import org.example.gui.ProductView;
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        ProductBLL productBLL = new ProductBLL();
+        ClientBLL clientBLL = new ClientBLL();
+        OrderBLL orderBLL = new OrderBLL();
+        BillBLL billBLL = new BillBLL();
+        BillView billView = new BillView(billBLL);
+        ProductView productView = new ProductView(productBLL,null);
+        OrderView orderView = new OrderView(productBLL, clientBLL, orderBLL, billView, productView);
+        productView.setoV(orderView);
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        ClientView clientView = new ClientView(orderView, productView, clientBLL);
     }
 }

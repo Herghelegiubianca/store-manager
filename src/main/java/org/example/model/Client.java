@@ -1,5 +1,11 @@
 package org.example.model;
 
+/**
+ * Reprezinta un client din baza de date.
+ *
+ * @author Bianca Herghelegiu
+ */
+
 public class Client {
     private int id;
     private String name;

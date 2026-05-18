@@ -1,15 +1,26 @@
 package org.example.dao;
 
+import org.example.connection.ConnectionFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-public class DatabaseManager<T> {
+/**
+ * Clasa generica DAO cu operatii CRUD pentru orice model, construite dinamic prin reflectie.
+ *
+ * @param <T> tipul modelului, trebuie sa corespunda cu numele tabelei din baza de date
+ * @author Bianca Herghelegiu
+ */
+
+public sealed class DatabaseManager<T> permits ClientDAO,ProductDAO,OrderDAO {
     private static final Logger LOGGER=Logger.getLogger(DatabaseManager.class.getName());
     private final Class<T> myClass;
 
@@ -18,31 +29,38 @@ public class DatabaseManager<T> {
         this.myClass=myClass;
     }
 
+    public static Logger getLogger()
+    {
+        return LOGGER;
+    }
+
+    /**
+     * Construieste un query de SELECT cu filtrare dupa campurile date.
+     *
+     * @param fields lista de campuri pentru clauza WHERE
+     * @return string-ul cu query-ul generat
+     */
     public String selectQuery(List<String> fields)
     {
         String command="SELECT * FROM ";
-        command=command+this.myClass.getSimpleName().toLowerCase();
-        int index=0;
+        if(this.myClass.getSimpleName().toLowerCase().equals("order"))command=command+"orders";
+        else command=command+this.myClass.getSimpleName().toLowerCase();
         if(fields!=null)
         {
             command=command+" WHERE ";
-            for(String s: fields)
-            {
-                if(s!=null)
-                {
-                   command=command+s+"=? ";
-                }
-                if(index<(fields.size()-1))
-                {
-                    command=command+"AND ";
-                }
-                index++;
-            }
+            String aux=fields.stream().filter(s->s!=null).map(s->s+"=?").collect(Collectors.joining(" AND "));
+            command+=aux;
             return command;
         }
         return null;
     }
 
+    /**
+     * Construieste o lista de obiecte de tip T din rezultatul unui query SQL.
+     *
+     * @param resultSet rezultatul query-ului
+     * @return lista de obiecte sau null daca rezultatul e gol
+     */
     public List<T> createObj(ResultSet resultSet)
     {
         if(resultSet!=null)
@@ -77,6 +95,13 @@ public class DatabaseManager<T> {
         return null;
     }
 
+    /**
+     * Cauta o inregistrare dupa id.
+     *
+     * @param id id-ul cautat
+     * @return obiectul gasit sau null daca nu exista
+     */
+
     public T findById(int id)
     {
         Connection connection=null;
@@ -87,7 +112,7 @@ public class DatabaseManager<T> {
         ResultSet resultSet=null;
 
         try{
-            connection=ConnectionFactory.getConnection();
+            connection= ConnectionFactory.getConnection();
             statement=connection.prepareStatement(query);
             statement.setInt(1,id);
             resultSet= statement.executeQuery();
@@ -109,10 +134,18 @@ public class DatabaseManager<T> {
         return null;
     }
 
+    /**
+     * Returneaza toate inregistrarile din tabela.
+     *
+     * @return lista de obiecte sau null daca tabela e goala
+     */
     public List<T> findAll()
     {
         Connection connection=null;
-        String query="SELECT * FROM "+this.myClass.getSimpleName().toLowerCase();
+        String table="";
+        if(this.myClass.getSimpleName().toLowerCase().equals("order"))table="orders";
+        else table=this.myClass.getSimpleName().toLowerCase();
+        String query="SELECT * FROM "+table;
         PreparedStatement statement=null;
         ResultSet resultSet=null;
 
@@ -138,48 +171,31 @@ public class DatabaseManager<T> {
         return null;
     }
 
+    /**
+     * Construieste un query de INSERT bazat pe campurile modelului prin reflectie.
+     *
+     * @return string-ul cu query-ul generat
+     */
     public String insertQuery()
     {
         String command="INSERT INTO ";
-        command=command+this.myClass.getSimpleName().toLowerCase()+" (";
-        int index=0;
-        java.lang.reflect.Field [] fields=this.myClass.getDeclaredFields();
-        if(fields!=null)
-        {
-            for(java.lang.reflect.Field f: fields)
-            {
-                if(f!=null && !f.getName().equals("id"))
-                {
-                    command=command+f.getName();
-                    if(index<(fields.length-1))
-                    {
-                        command=command+", ";
-                    }
-                }
-                index++;
-            }
+        if(this.myClass.getSimpleName().toLowerCase().equals("order"))command=command+"orders (";
+        else command=command+this.myClass.getSimpleName().toLowerCase()+" (";
+        String columns= Arrays.stream(this.myClass.getDeclaredFields()).filter(f->!f.getName().equals("id")).map(java.lang.reflect.Field::getName).collect(Collectors.joining(", "));
+        command=command+columns;
+        command=command+") VALUES(";
 
-            command=command+") VALUES(";
-            index=0;
-            for(java.lang.reflect.Field f: fields)
-            {
-                if(f!=null && !f.getName().equals("id"))
-                {
-                    command=command+"?";
-                    if(index<(fields.length-1))
-                    {
-                        command=command+", ";
-                    }
-                }
-                index++;
-            }
-            command=command+")";
-            return command;
-
-        }
-        return null;
+        String values=Arrays.stream(this.myClass.getDeclaredFields()).filter(f->!f.getName().equals("id")).map(f->"?").collect(Collectors.joining(", "));
+        command+=values+")";
+        return command;
     }
 
+    /**
+     * Insereaza un obiect si seteaza id-ul generat pe el.
+     *
+     * @param obj obiectul de inserat
+     * @return obiectul cu id-ul setat sau null la eroare
+     */
     public T insert(T obj)
     {
         Connection connection=null;
@@ -188,7 +204,7 @@ public class DatabaseManager<T> {
 
         try{
             connection=ConnectionFactory.getConnection();
-            statement=connection.prepareStatement(query);
+            statement=connection.prepareStatement(query,java.sql.Statement.RETURN_GENERATED_KEYS);
             Object val=null;
             int index=1;
 
@@ -205,6 +221,15 @@ public class DatabaseManager<T> {
             }
 
             statement.executeUpdate();
+            ResultSet aux=statement.getGeneratedKeys(); //verific daca nu e gol
+            if(aux.next())
+            {
+                int id=aux.getInt(1);
+                java.lang.reflect.Field field=this.myClass.getDeclaredField("id");
+                field.setAccessible(true);
+                field.set(obj,id);
+                field.setAccessible(false);
+            }
             return obj;
 
         }catch(Exception e) {
@@ -218,33 +243,34 @@ public class DatabaseManager<T> {
         return null;
     }
 
+    /**
+     * Construieste un query de DELETE cu filtrare dupa campurile date.
+     *
+     * @param fields lista de campuri pentru clauza WHERE
+     * @return string-ul cu query-ul generat
+     */
     public String deleteQuery(List<String> fields)
     {
         String command="DELETE FROM ";
-        command=command+this.myClass.getSimpleName().toLowerCase();
-        int index=0;
+        if(this.myClass.getSimpleName().toLowerCase().equals("order"))command=command+"orders";
+        else command=command+this.myClass.getSimpleName().toLowerCase();
 
         if(fields!=null && !fields.isEmpty())
         {
             command=command+" WHERE ";
-            for(String f: fields)
-            {
-                if(f!=null)
-                {
-                    command=command+f+"=? ";
-                    if(index<(fields.size()-1))
-                    {
-                        command=command+"AND ";
-                    }
-                }
-                index++;
-            }
+            String aux=fields.stream().filter(f->f!=null).map(f->f+"=?").collect(Collectors.joining(" AND "));
+            command+=aux;
             return command;
 
         }
         return null;
     }
 
+    /**
+     * Sterge inregistrarea cu id-ul dat.
+     *
+     * @param id id-ul inregistrarii de sters
+     */
     public void delete(int id)
     {
         Connection connection=null;
@@ -270,34 +296,34 @@ public class DatabaseManager<T> {
 
     }
 
+    /**
+     * Construieste un query de UPDATE bazat pe campurile modelului prin reflectie.
+     *
+     * @return string-ul cu query-ul generat
+     */
     public String updateQuery()
     {
         String command="UPDATE ";
-        command=command+this.myClass.getSimpleName().toLowerCase()+" SET ";
+        if(this.myClass.getSimpleName().toLowerCase().equals("order"))command=command+"orders";
+        else command=command+this.myClass.getSimpleName().toLowerCase();
+        command=command+" SET ";
         int index=0;
 
         if(this.myClass.getDeclaredFields()==null) return null;
 
-        for(java.lang.reflect.Field f: this.myClass.getDeclaredFields())
-        {
-            if(f.getName().equals("id"))
-            {
-                index++;
-                continue;
-            }
-            command=command+f.getName()+"=?";
-            if(index<(this.myClass.getDeclaredFields().length-1))
-            {
-                command=command+", ";
-            }
-            index++;
-        }
-
+        String aux=Arrays.stream(this.myClass.getDeclaredFields()).filter(f->!f.getName().equals("id")).map(f->f.getName()+"=?").collect(Collectors.joining(", "));
+        command+=aux;
         command=command+" WHERE id=?";
 
         return command;
     }
 
+    /**
+     * Actualizeaza inregistrarea cu id-ul corespunzator obiectului.
+     *
+     * @param obj obiectul cu valorile noi
+     * @return obiectul actualizat sau null la eroare
+     */
     public T update(T obj)
     {
         Connection connection=null;
@@ -314,21 +340,18 @@ public class DatabaseManager<T> {
 
             for(java.lang.reflect.Field f: this.myClass.getDeclaredFields())
             {
-               f.setAccessible(true);
                if(!f.getName().equals("id"))
                {
+                   f.setAccessible(true);
                   val=f.get(obj);
-                  statement.setObject(index,val);
-                  index++;
-
+                  statement.setObject(index++,val);
+                   f.setAccessible(false);
                }
-               else
-               {
-                   idAux=f.get(obj);
-               }
-               f.setAccessible(false);
             }
-            statement.setObject(index,idAux);
+            java.lang.reflect.Field field=this.myClass.getDeclaredField("id");
+            field.setAccessible(true);
+            statement.setObject(index,field.get(obj));
+            field.setAccessible(false);
             statement.executeUpdate();
             return obj;
         }catch(Exception e)

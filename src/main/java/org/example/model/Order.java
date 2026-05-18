@@ -1,5 +1,11 @@
 package org.example.model;
 
+/**
+ * Reprezinta o comanda plasata de un client.
+ *
+ * @author Bianca Herghelegiu
+ */
+
 public class Order {
     private int id;
     private int product_id;

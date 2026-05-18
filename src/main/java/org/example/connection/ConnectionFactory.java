@@ -1,8 +1,14 @@
-package org.example.dao;
+package org.example.connection;
 
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+/**
+ * Clasa pentru gestionarea conexiunilor la baza de date PostgreSQL.
+ *
+ * @author Bianca Herghelegiu
+ */
 
 public class ConnectionFactory {
 private static final Logger LOGGER = Logger.getLogger(
@@ -32,9 +38,20 @@ private static ConnectionFactory singleInstance = new ConnectionFactory();
             return connection;
     }
 
+    /**
+     * Returneaza o conexiune activa la baza de date.
+     *
+     * @return obiectul Connection
+     */
     public static Connection getConnection() {
            return singleInstance.createConnection();
     }
+
+    /**
+     * Inchide o conexiune deschisa.
+     *
+     * @param connection conexiunea de inchis
+     */
     public static void close(Connection connection) {
            if(connection!=null) {
                try{
@@ -46,6 +63,11 @@ private static ConnectionFactory singleInstance = new ConnectionFactory();
            }
     }
 
+    /**
+     * Inchide un Statement deschis.
+     *
+     * @param statement statement-ul de inchis
+     */
     public static void close(Statement statement) {
            if(statement!=null) {
                try{
@@ -57,6 +79,11 @@ private static ConnectionFactory singleInstance = new ConnectionFactory();
            }
     }
 
+    /**
+     * Inchide un ResultSet deschis.
+     *
+     * @param resultSet result set-ul de inchis
+     */
     public static void close(ResultSet resultSet) {
           if(resultSet!=null) {
               try{

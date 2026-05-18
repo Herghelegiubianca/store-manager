@@ -1,5 +1,11 @@
 package org.example.model;
 
+/**
+ * Reprezinta un produs din magazin.
+ *
+ * @author Bianca Herghelegiu
+ */
+
 public class Product {
     private int id;
     private String name;
