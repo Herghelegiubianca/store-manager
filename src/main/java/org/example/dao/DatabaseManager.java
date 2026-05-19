@@ -287,7 +287,8 @@ public sealed class DatabaseManager<T> permits ClientDAO,ProductDAO,OrderDAO {
             statement.executeUpdate();
         }catch(Exception e)
         {
-            this.LOGGER.log(Level.WARNING,"Eroare DatabaseManager delete!");
+            System.out.println(">>> EROARE SQL LA STERGERE: " + e.getMessage());
+            this.LOGGER.log(Level.WARNING, "Eroare DatabaseManager delete!", e);
         }finally
         {
             ConnectionFactory.close(statement);

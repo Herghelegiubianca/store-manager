@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict FcoY1jeXOzLzVGdpyoqs22biV8LrgnuwsT7i1YOxwwQdmBfrkZrUHVmD01QxsPq
+\restrict 2C4pdCC3rlJLPc5nuqftcbndQYPMbwROeSOmCmhF3GhXhwtpguLfIs3l0VEyfZj
 
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
 
--- Started on 2026-05-18 01:26:43
+-- Started on 2026-05-19 14:46:27
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -22,7 +22,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 5044 (class 1262 OID 17257)
+-- TOC entry 5043 (class 1262 OID 17257)
 -- Name: ordersdb; Type: DATABASE; Schema: -; Owner: postgres
 --
 
@@ -31,9 +31,9 @@ CREATE DATABASE ordersdb WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROV
 
 ALTER DATABASE ordersdb OWNER TO postgres;
 
-\unrestrict FcoY1jeXOzLzVGdpyoqs22biV8LrgnuwsT7i1YOxwwQdmBfrkZrUHVmD01QxsPq
+\unrestrict 2C4pdCC3rlJLPc5nuqftcbndQYPMbwROeSOmCmhF3GhXhwtpguLfIs3l0VEyfZj
 \connect ordersdb
-\restrict FcoY1jeXOzLzVGdpyoqs22biV8LrgnuwsT7i1YOxwwQdmBfrkZrUHVmD01QxsPq
+\restrict 2C4pdCC3rlJLPc5nuqftcbndQYPMbwROeSOmCmhF3GhXhwtpguLfIs3l0VEyfZj
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -119,7 +119,7 @@ CREATE SEQUENCE public.client_id_seq
 ALTER SEQUENCE public.client_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5045 (class 0 OID 0)
+-- TOC entry 5044 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: client_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -159,7 +159,7 @@ CREATE SEQUENCE public.orders_id_seq
 ALTER SEQUENCE public.orders_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5046 (class 0 OID 0)
+-- TOC entry 5045 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -199,7 +199,7 @@ CREATE SEQUENCE public.product_id_seq
 ALTER SEQUENCE public.product_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5047 (class 0 OID 0)
+-- TOC entry 5046 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: product_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -232,61 +232,64 @@ ALTER TABLE ONLY public.product ALTER COLUMN id SET DEFAULT nextval('public.prod
 
 
 --
--- TOC entry 5037 (class 0 OID 17327)
+-- TOC entry 5036 (class 0 OID 17327)
 -- Dependencies: 225
 -- Data for Name: bill; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.bill (orderid, clientid, productid, clientname, productname, price, totalprice, "time", quantity, bill_id) FROM stdin;
 1	1	1	Ernuteanu Tatiana	Telefon Samsung	3200.03	6400.06	2026-05-12	2	1
+2	2	1	Herghelegiu Bianca	Telefon Samsung	3200.03	6400.06	2026-05-18	2	2
+3	2	2	Herghelegiu Bianca	Chitara Fender	3999.99	7999.98	2026-05-18	2	3
+3	1	2	Ernuteanu Tatiana	Chitara Fender	3999.99	7999.98	2026-05-18	2	4
+3	1	2	Ernuteanu Tatiana	Chitara Fender	3999.99	3999.99	2026-05-18	1	5
 \.
 
 
 --
--- TOC entry 5032 (class 0 OID 17259)
+-- TOC entry 5031 (class 0 OID 17259)
 -- Dependencies: 220
 -- Data for Name: client; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.client (id, name, address, email) FROM stdin;
 1	Ernuteanu Tatiana	Bucuresti, George Cosbuc, 6	poetiRomani@gmail.com
-2	Herghelegiu Bianca	Barlad, Lamaitei, 9	bubu@yahoo.com
 \.
 
 
 --
--- TOC entry 5036 (class 0 OID 17307)
+-- TOC entry 5035 (class 0 OID 17307)
 -- Dependencies: 224
 -- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.orders (id, product_id, client_id, quantity) FROM stdin;
-1	1	1	2
+3	2	1	1
 \.
 
 
 --
--- TOC entry 5034 (class 0 OID 17294)
+-- TOC entry 5033 (class 0 OID 17294)
 -- Dependencies: 222
 -- Data for Name: product; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.product (id, name, price, stock) FROM stdin;
-1	Telefon Samsung	3200.03	8
+1	Telefon Samsung	3200.03	6
 \.
 
 
 --
--- TOC entry 5048 (class 0 OID 0)
+-- TOC entry 5047 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: bill_bill_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.bill_bill_id_seq', 1, true);
+SELECT pg_catalog.setval('public.bill_bill_id_seq', 5, true);
 
 
 --
--- TOC entry 5049 (class 0 OID 0)
+-- TOC entry 5048 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -295,21 +298,21 @@ SELECT pg_catalog.setval('public.client_id_seq', 2, true);
 
 
 --
--- TOC entry 5050 (class 0 OID 0)
+-- TOC entry 5049 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.orders_id_seq', 1, true);
+SELECT pg_catalog.setval('public.orders_id_seq', 3, true);
 
 
 --
--- TOC entry 5051 (class 0 OID 0)
+-- TOC entry 5050 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.product_id_seq', 1, true);
+SELECT pg_catalog.setval('public.product_id_seq', 2, true);
 
 
 --
@@ -357,20 +360,11 @@ ALTER TABLE ONLY public.orders
     ADD CONSTRAINT client_fk FOREIGN KEY (client_id) REFERENCES public.client(id);
 
 
---
--- TOC entry 4883 (class 2606 OID 17317)
--- Name: orders product__fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT product__fk FOREIGN KEY (product_id) REFERENCES public.product(id);
-
-
--- Completed on 2026-05-18 01:26:43
+-- Completed on 2026-05-19 14:46:27
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict FcoY1jeXOzLzVGdpyoqs22biV8LrgnuwsT7i1YOxwwQdmBfrkZrUHVmD01QxsPq
+\unrestrict 2C4pdCC3rlJLPc5nuqftcbndQYPMbwROeSOmCmhF3GhXhwtpguLfIs3l0VEyfZj
 
